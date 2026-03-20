@@ -30,6 +30,14 @@ class Agent:
                 return plan.output
 
             tool_result = self.executor.execute(plan, trace_id=trace_id)
-            self.memory.add_tool_message(tool_result, trace_id=trace_id)
+            # 如果工具成功，直接返回，避免再过 LLM
+            if tool_result.get("status") == "ok":
+                final_output = tool_result.get("output", "")
+                self.memory.add_tool_message(tool_result, plan.tool_name or "unknown", trace_id=trace_id)
+                self.memory.add_agent_message(final_output, trace_id=trace_id)
+                return final_output
+
+            # 否则记录工具输出再继续下一轮
+            self.memory.add_tool_message(tool_result, plan.tool_name or "unknown", trace_id=trace_id)
 
         return "Reached max steps without conclusion."

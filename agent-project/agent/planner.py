@@ -7,6 +7,9 @@ from agent.prompt import build_planner_prompt
 from llm.client import LLMClient
 from config import Settings
 
+from pydantic import ValidationError
+from agent.parser import parse_plan
+from colorama import Fore
 
 @dataclass
 class Plan:
@@ -25,16 +28,22 @@ class Planner:
 
     def decide(self, memory, trace_id: str) -> Plan:
         prompt = build_planner_prompt(memory.messages, self.available_tools)
+        self.logger.info("planner.prompt", extra = {"trace_id": trace_id, "prompt": prompt})
         response = self.llm.chat(prompt, trace_id=trace_id)
         return self._parse_response(response)
 
     def _parse_response(self, response: dict) -> Plan:
-        # Placeholder parser, to be replaced with a robust schema-based parser.
-        if response.get("action") == "final":
-            return Plan(action="final", output=response.get("output", ""))
+        try:
+            plan_model = parse_plan(response)
+        except ValidationError as e:
+            self.logger.error("planner.parsee_error", extra = {"errors: ", e.errors()})
+            return Plan(action="final", output="Failed to parse plan")
+        
+        if plan_model.action == "final":
+            return Plan(action="final", output=plan_model.output or "")
         return Plan(
             action="tool",
-            tool_name=response.get("tool"),
-            tool_input=response.get("tool_input", {}),
-            thoughts=response.get("thoughts"),
+            tool_name=plan_model.tool,
+            tool_input=plan_model.tool_input,
+            thoughts=plan_model.thoughts,
         )

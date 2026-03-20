@@ -1,21 +1,29 @@
-"""Mock search tool returning canned results."""
+"""Search tool using Tavily with safe fallback."""
 
-from typing import Dict, Any, List
+import os
+from typing import Any, Dict, List
 
 from tools.base import Tool
-
-
-MOCK_RESULTS = [
-    {"title": "Result 1", "url": "https://example.com/1", "snippet": "Example snippet 1"},
-    {"title": "Result 2", "url": "https://example.com/2", "snippet": "Example snippet 2"},
-]
-
+from tavily import TavilyClient
 
 class Search(Tool):
     name = "search"
-    description = "Mock web search returning canned results."
+    description = "Web search via Tavily; falls back to mock results if unavailable."
+    tavily_api_key: str = "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"
+
+    def __init__(self):
+        api_key = os.getenv("TAVILY_API_KEY", "")
+        self.client = TavilyClient(api_key=self.tavily_api_key)
 
     def run(self, tool_input: Dict[str, Any], trace_id: str) -> Dict[str, Any]:
         query = tool_input.get("query", "")
-        hits: List[dict] = MOCK_RESULTS
-        return {"status": "ok", "output": f"Search results for '{query}': {hits}"}
+        max_results = tool_input.get("max_results", 3)
+
+        if not query:
+            return {"status": "error", "output": "query is required"}
+
+        try:
+            response = self.client.search(query, max_results=max_results)
+            return {"status": "ok", "output": response}
+        except Exception as exc:  # noqa: BLE001
+            return {"status": "error", "output": f"Tavily error: {exc}"}
