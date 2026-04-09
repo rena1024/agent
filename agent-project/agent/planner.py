@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from agent.parser import parse_plan
 from colorama import Fore
 
+
 @dataclass
 class Plan:
     action: str  # "tool" or "final"
@@ -28,17 +29,22 @@ class Planner:
 
     def decide(self, memory, trace_id: str) -> Plan:
         prompt = build_planner_prompt(memory.messages, self.available_tools)
-        self.logger.info("planner.prompt", extra = {"trace_id": trace_id, "prompt": prompt})
+        self.logger.info(
+            "planner.prompt", extra={"trace_id": trace_id, "prompt": prompt}
+        )
         response = self.llm.chat(prompt, trace_id=trace_id)
+
         return self._parse_response(response)
 
     def _parse_response(self, response: dict) -> Plan:
         try:
-            plan_model = parse_plan(response)
+            plan_model = parse_plan(response["output"])
         except ValidationError as e:
-            self.logger.error("planner.parsee_error", extra = {"errors: ", e.errors()})
+            self.logger.error(
+                "planner.parse_error", extra={"errors": e.errors(), "raw": response}
+            )
             return Plan(action="final", output="Failed to parse plan")
-        
+
         if plan_model.action == "final":
             return Plan(action="final", output=plan_model.output or "")
         return Plan(

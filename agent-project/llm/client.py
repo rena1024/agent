@@ -1,5 +1,6 @@
 """LLM client using local Ollama with simple tool-call heuristics."""
 
+from opentelemetry.metrics import obj
 import json
 import re
 from typing import List
@@ -9,6 +10,51 @@ import requests
 
 from llm.schemas import Message
 from config import Settings
+from colorama import Fore
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "calculator",
+            "description": "Evaluate arithmetic expression",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "expression": {"type": "string", "description": "math expression"}
+                },
+                "required": ["expression"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search",
+            "description": "Web search query",
+            "parameters": {
+                "type": "object",
+                "properties": {"query": {"type": "string"}},
+                "required": ["query"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "retrieval",
+            "description": "Query internal knowledge base",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string"},
+                    "top_k": {"type": "integer"},
+                },
+                "required": ["query"],
+            },
+        },
+    },
+]
 
 
 class LLMClient:
@@ -17,7 +63,7 @@ class LLMClient:
         self.logger = logger
         self.host = settings.ollama_host
 
-    def chat(self, prompt: str, trace_id: str) -> dict:
+    def heuristic(self, prompt: str, trace_id: str) -> dict:
         """
         Heuristic flow:
         1) 聚焦最近一条 user 消息做意图判断，避免被历史工具输出短路。
@@ -30,7 +76,9 @@ class LLMClient:
         )
         history_text = hist_match.group(1) if hist_match else prompt
 
-        lines = re.findall(r"^(user|assistant|tool):\s*(.+)$", history_text, flags=re.MULTILINE)
+        lines = re.findall(
+            r"^(user|assistant|tool):\s*(.+)$", history_text, flags=re.MULTILINE
+        )
         last_role, last_content = lines[-1] if lines else ("user", prompt)
 
         # 如果最后一条是工具输出，直接把结果作为最终回复
@@ -48,7 +96,9 @@ class LLMClient:
             return {
                 "action": "tool",
                 "tool": "calculator",
-                "tool_input": {"expression": expr_match.group(1).strip() if expr_match else "1+1"},
+                "tool_input": {
+                    "expression": expr_match.group(1).strip() if expr_match else "1+1"
+                },
                 "thoughts": "用计算器求值",
             }
         if re.search(r"搜索|查询|找", latest_user):
@@ -69,8 +119,35 @@ class LLMClient:
             }
 
         # 3) 兜底直接模型回复
-        data = ollama.chat(model=self.model, messages=[{"role": "user", "content": prompt}])
-        return {"action": "final", "output": data["message"]["content"]}
+        resp = ollama.chat(
+            model=self.model,
+            messages=[{"role": "user", "content": prompt}],
+            tools=tools,
+            stream=False,
+        )
+        return {"action": "final", "output": resp["message"]["content"]}
+
+    def chat(
+        self, prompt: str, trace_id: str, use_function_calling: bool = True
+    ) -> dict:
+        if not use_function_calling:
+            return self.heuristic(prompt, trace_id)
+        resp = ollama.chat(
+            model=self.model,
+            messages=[{"role": "user", "content": prompt}],
+            tools=tools,
+            stream=False,
+            format="json",
+            options={"temperature": 0, "seed": 42},
+        )
+
+        msg = resp["message"]
+        content_text = msg["content"]
+        self.logger.info(
+            "planner.response", extra={"trace_id": trace_id, "response": content_text}
+        )
+        obj = json.loads(content_text)
+        return {"action": obj.get("action"), "output": content_text}
 
     def chatWithAPI(self, prompt: str, trace_id: str) -> dict:
         payload = {
