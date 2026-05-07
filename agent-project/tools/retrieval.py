@@ -45,7 +45,10 @@ class Retrieval(Tool):
         except Exception:
             top_k = 10
 
-        threshold = 0.4
+        retrieval_candidate_filter_distance = (
+            0.6  # legacy filter; final accept/reject should be done by the agent
+        )
+        disable_rerank = bool(tool_input.get("disable_rerank", False))
 
         if not query.strip():
             return {"status": "error", "output": "Query is required"}
@@ -59,31 +62,61 @@ class Retrieval(Tool):
             hits = index.query(query, top_k)
             if isinstance(hits, dict) and "error" in hits:
                 return {"status": "error", "output": hits["error"]}
+
+            # Basic retrieval stats for downstream decisioning.
+            dists = [h.get("distance", 1.0) for h in hits if isinstance(h, dict)]
+            dists_sorted = sorted(
+                [float(d) for d in dists if isinstance(d, (int, float))]
+            )
+            best = dists_sorted[0] if dists_sorted else 1.0
+            second = dists_sorted[1] if len(dists_sorted) > 1 else 1.0
+            gap = float(second) - float(best)
+            retrieval_stats = {
+                "best_distance": float(best),
+                "second_distance": float(second),
+                "gap_distance": float(gap),
+                "retrieval_candidate_filter_distance": float(
+                    retrieval_candidate_filter_distance
+                ),
+            }
+
             filtered = []
             for h in hits:
                 dist = h.get("distance", 1.0)
-                if dist <= threshold:
-                    filtered.append(h)
+                try:
+                    if float(dist) <= retrieval_candidate_filter_distance:
+                        filtered.append(h)
+                except Exception:
+                    continue
+            # If legacy-threshold filtering yields nothing, still return top hits so the agent
+            # can decide to reject and fall back (instead of infinite loops).
             if not filtered:
-                return {
-                    "status": "error",
-                    "output": f"No relevant context found (threshold {threshold})",
-                }
+                filtered = hits[: min(5, len(hits))]
 
-            # Cross-encoder rerank on the filtered set.
-            rerank_top_n = int(tool_input.get("rerank_top_n", min(5, len(filtered))))
-            rerank_model = tool_input.get("rerank_model", "BAAI/bge-reranker-v2-m3")
-            reranked = rerank_hits(
-                query, filtered, top_n=rerank_top_n, model_name=rerank_model
-            )
-            base_hits = reranked.hits
+            # Cross-encoder rerank on the filtered set (optional).
+            if disable_rerank:
+                base_hits = filtered
+                rerank_backend = "none"
+            else:
+                rerank_top_n = int(
+                    tool_input.get("rerank_top_n", min(5, len(filtered)))
+                )
+                rerank_model = tool_input.get(
+                    "rerank_model", "BAAI/bge-reranker-v2-m3"
+                )
+                reranked = rerank_hits(
+                    query, filtered, top_n=rerank_top_n, model_name=rerank_model
+                )
+                base_hits = reranked.hits
+                rerank_backend = reranked.backend
 
             expand = bool(tool_input.get("expand_neighbors", True))
             if not expand:
                 return {
                     "status": "ok",
                     "output": base_hits,
-                    "rerank_backend": reranked.backend,
+                    "rerank_backend": rerank_backend,
+                    "retrieval_stats": retrieval_stats,
                 }
 
             radius = int(tool_input.get("neighbor_radius", 1))
@@ -108,7 +141,8 @@ class Retrieval(Tool):
                 return {
                     "status": "ok",
                     "output": base_hits,
-                    "rerank_backend": reranked.backend,
+                    "rerank_backend": rerank_backend,
+                    "retrieval_stats": retrieval_stats,
                 }
 
             lookup: dict[tuple[str, int], dict] = {}
@@ -148,7 +182,8 @@ class Retrieval(Tool):
             return {
                 "status": "ok",
                 "output": windows,
-                "rerank_backend": reranked.backend,
+                "rerank_backend": rerank_backend,
+                "retrieval_stats": retrieval_stats,
             }
         except Exception as e:
             return {"status": "error", "output": str(e)}

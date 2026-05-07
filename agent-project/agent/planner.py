@@ -28,7 +28,12 @@ class Planner:
         self.available_tools = settings.tool_registry.keys()
 
     def decide(self, memory, trace_id: str) -> Plan:
-        prompt = build_planner_prompt(memory.messages, self.available_tools)
+        facts_block = ""
+        try:
+            facts_block = memory.facts_block()
+        except Exception:
+            facts_block = ""
+        prompt = build_planner_prompt(memory.messages, self.available_tools, facts_block=facts_block)
         self.logger.info(
             "planner.prompt", extra={"trace_id": trace_id, "prompt": prompt}
         )

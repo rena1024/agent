@@ -35,6 +35,20 @@ class CrossEncoderReranker:
         return RerankResult(hits=scored[:top_n], backend="cross-encoder")
 
 
+# Process-wide cache to avoid re-loading weights for every query.
+_RERANKER_CACHE: dict[tuple[str, Optional[str]], CrossEncoderReranker] = {}
+
+
+def _get_reranker(model_name: str, device: Optional[str]) -> CrossEncoderReranker:
+    key = (model_name, device)
+    rr = _RERANKER_CACHE.get(key)
+    if rr is not None:
+        return rr
+    rr = CrossEncoderReranker(model_name=model_name, device=device)
+    _RERANKER_CACHE[key] = rr
+    return rr
+
+
 def rerank_hits(
     query: str,
     hits: List[Dict[str, Any]],
@@ -51,7 +65,7 @@ def rerank_hits(
         return RerankResult(hits=[], backend="none")
 
     try:
-        reranker = CrossEncoderReranker(model_name=model_name, device=device)
+        reranker = _get_reranker(model_name=model_name, device=device)
         return reranker.rerank(query, hits, top_n=top_n)
     except Exception:  # noqa: BLE001
         return RerankResult(hits=hits[:top_n], backend="none")

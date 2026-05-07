@@ -1,5 +1,6 @@
 """Simple in-memory message store."""
 
+import re
 from typing import List
 
 
@@ -10,8 +11,37 @@ class Memory:
         self.max_turns = 3
         self.max_tool = 2
         self.summary: str | None = None
+        self.facts: dict[str, str] = {}
+
+    def facts_block(self) -> str:
+        if not self.facts:
+            return ""
+        lines = [f"- {k}: {v}" for k, v in sorted(self.facts.items())]
+        return "\n".join(lines)
+
+    def _extract_facts(self, text: str) -> None:
+        """
+        Lightweight fact extraction for interview-style chat.
+        Keep it deterministic so it doesn't depend on LLM behavior.
+        """
+        t = (text or "").strip()
+        if not t:
+            return
+
+        patterns = [
+            r"(?:我叫|我的名字是|叫我)\s*([A-Za-z][\w\-]{0,30}|[\u4e00-\u9fff]{1,10})",
+            r"(?:my name is|i am|i'm)\s+([A-Za-z][\w\-]{0,30})",
+        ]
+        for p in patterns:
+            m = re.search(p, t, flags=re.IGNORECASE)
+            if m:
+                name = m.group(1).strip().strip("。.!?，,")
+                if name:
+                    self.facts["user_name"] = name
+                break
 
     def add_user_message(self, content: str, trace_id: str):
+        self._extract_facts(content)
         self.messages.append({"role": "user", "content": content, "trace_id": trace_id})
         self._trim_tool()
 
