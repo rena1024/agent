@@ -18,5 +18,5 @@ def test_tool_call_arguments_malformed():
             }
         ],
     }
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         parse_plan(raw)

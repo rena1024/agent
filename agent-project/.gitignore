@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.so
+.DS_Store
+.pytest_cache/
+.venv/
+*.egg-info/
+
+# Local environment and editor files
+.env
+.env.*
+.idea/
+.vscode/
+
+# Model / index artifacts
+data/index/
+
