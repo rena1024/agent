@@ -1,0 +1,65 @@
+{"id":"calc-01","category":"calculation","turns":[{"user":"计算 19*7-5","expected":{"route":"calculator","answer_contains":["128"]}}]}
+{"id":"calc-02","category":"calculation","turns":[{"user":"帮我算一下 (120+45)/3","expected":{"route":"calculator","answer_contains":["55"]}}]}
+{"id":"calc-03","category":"calculation","turns":[{"user":"0.5*(8+6) 等于多少？","expected":{"route":"calculator","answer_contains":["7"]}}]}
+{"id":"calc-04","category":"calculation","turns":[{"user":"100/4+18","expected":{"route":"calculator","answer_contains":["43"]}}]}
+{"id":"calc-05","category":"calculation","turns":[{"user":"(9+9)*(9-3)","expected":{"route":"calculator","answer_contains":["108"]}}]}
+{"id":"calc-06","category":"calculation","turns":[{"user":"2**5+3","expected":{"route":"calculator","answer_contains":["35"]}}]}
+{"id":"calc-07","category":"calculation","turns":[{"user":"(7-2)*(7+2) 是多少","expected":{"route":"calculator","answer_contains":["45"]}}]}
+{"id":"calc-08","category":"calculation","turns":[{"user":"1/8 等于多少","expected":{"route":"calculator","answer_contains":["0.125"]}}]}
+{"id":"calc-09","category":"calculation","turns":[{"user":"(3.5+2.5)*4","expected":{"route":"calculator","answer_contains":["24"]}}]}
+{"id":"calc-10","category":"calculation","turns":[{"user":"(50-17)/11","expected":{"route":"calculator","answer_contains":["3"]}}]}
+{"id":"calc-11","category":"calculation","turns":[{"user":"-5+12*3","expected":{"route":"calculator","answer_contains":["31"]}}]}
+{"id":"calc-12","category":"calculation","turns":[{"user":"(6/4)*(10-2)","expected":{"route":"calculator","answer_contains":["12"]}}]}
+
+{"id":"kb-01","category":"internal_docs","turns":[{"user":"根据内部资料，解释一下 TCP 四次挥手的流程，并说明 time_wait 出现的时机。","expected":{"route":"retrieval","must_cite_sources":true}}]}
+{"id":"kb-02","category":"internal_docs","turns":[{"user":"根据内部资料，简单说下 select 和 epoll 的区别，以及边沿触发和水平触发。","expected":{"route":"retrieval","must_cite_sources":true}}]}
+{"id":"kb-03","category":"internal_docs","turns":[{"user":"根据内部资料，volatile 关键字的作用是什么？","expected":{"route":"retrieval","must_cite_sources":true}}]}
+{"id":"kb-04","category":"internal_docs","turns":[{"user":"根据内部资料，inline 函数有什么好处？","expected":{"route":"retrieval","must_cite_sources":true}}]}
+{"id":"kb-05","category":"internal_docs","turns":[{"user":"根据内部资料，深拷贝和浅拷贝有什么区别？","expected":{"route":"retrieval","must_cite_sources":true}}]}
+{"id":"kb-06","category":"internal_docs","turns":[{"user":"根据内部资料，map 的底层实现是什么？unordered_map 的底层实现是什么？","expected":{"route":"retrieval","must_cite_sources":true}}]}
+{"id":"kb-07","category":"internal_docs","turns":[{"user":"根据内部资料，解释一下 Redis 的 zset 用了哪些数据结构。","expected":{"route":"retrieval","must_cite_sources":true}}]}
+{"id":"kb-08","category":"internal_docs","turns":[{"user":"根据内部资料，MySQL 事务隔离级别有哪些，默认是哪个？","expected":{"route":"retrieval","must_cite_sources":true}}]}
+{"id":"kb-09","category":"internal_docs","turns":[{"user":"根据内部资料，什么是缓存穿透和缓存雪崩？分别怎么应对？","expected":{"route":"retrieval","must_cite_sources":true}}]}
+{"id":"kb-10","category":"internal_docs","turns":[{"user":"根据内部资料，解释一下 ThreadLocal 的作用和典型使用场景。","expected":{"route":"retrieval","must_cite_sources":true}}]}
+{"id":"kb-11","category":"internal_docs","turns":[{"user":"根据内部资料，简述 Kafka 的 rebalance 机制和 ISR 是什么。","expected":{"route":"retrieval","must_cite_sources":true}}]}
+{"id":"kb-12","category":"internal_docs","turns":[{"user":"根据内部资料，解释 C 和 C++ 的区别，以及指针和引用的区别。","expected":{"route":"retrieval","must_cite_sources":true}}]}
+
+{"id":"web-01","category":"external_search","turns":[{"user":"明天上海天气怎么样？需要带伞吗？","expected":{"route":"search","must_state_uncertainty_if_no_web":true}}]}
+{"id":"web-02","category":"external_search","turns":[{"user":"现在美元兑人民币汇率大概是多少？","expected":{"route":"search","must_state_uncertainty_if_no_web":true}}]}
+{"id":"web-03","category":"external_search","turns":[{"user":"今天 AAPL 的股价是多少？","expected":{"route":"search","must_state_uncertainty_if_no_web":true}}]}
+{"id":"web-04","category":"external_search","turns":[{"user":"2026 年最新的 Python 稳定版本是多少？","expected":{"route":"search","must_state_uncertainty_if_no_web":true}}]}
+{"id":"web-05","category":"external_search","turns":[{"user":"最近一周比特币有什么大新闻？","expected":{"route":"search","must_state_uncertainty_if_no_web":true}}]}
+{"id":"web-06","category":"external_search","turns":[{"user":"给我推荐 3 部最近两年口碑很好的科幻电影。","expected":{"route":"search","must_state_uncertainty_if_no_web":true}}]}
+{"id":"web-07","category":"external_search","turns":[{"user":"马斯克现在是哪些公司的 CEO？","expected":{"route":"search","must_state_uncertainty_if_no_web":true}}]}
+{"id":"web-08","category":"external_search","turns":[{"user":"今天 NBA 有哪些比赛？湖人打了吗？","expected":{"route":"search","must_state_uncertainty_if_no_web":true}}]}
+{"id":"web-09","category":"external_search","turns":[{"user":"OpenAI 最新的 API 计费方式是什么？","expected":{"route":"search","must_state_uncertainty_if_no_web":true}}]}
+{"id":"web-10","category":"external_search","turns":[{"user":"给我查一下最近的黄金价格（人民币/克）大概多少。","expected":{"route":"search","must_state_uncertainty_if_no_web":true}}]}
+{"id":"web-11","category":"external_search","turns":[{"user":"最近上海有什么值得去的展览？","expected":{"route":"search","must_state_uncertainty_if_no_web":true}}]}
+{"id":"web-12","category":"external_search","turns":[{"user":"帮我查一下“XX软件”最新版本更新了什么（我不确定名字对不对）。","expected":{"route":"search","must_ask_clarifying_question":true}}]}
+
+{"id":"na-01","category":"no_answer","turns":[{"user":"根据内部资料，我们公司 2026 年的年假政策是什么？","expected":{"route":"retrieval","should_admit_no_internal":true}}]}
+{"id":"na-02","category":"no_answer","turns":[{"user":"根据内部资料，项目的线上域名和账号密码是多少？","expected":{"route":"final","should_refuse_sensitive":true}}]}
+{"id":"na-03","category":"no_answer","turns":[{"user":"根据内部资料，Kubernetes HPA 的实现细节是什么？","expected":{"route":"retrieval","should_admit_no_internal":true}}]}
+{"id":"na-04","category":"no_answer","turns":[{"user":"根据内部资料，我们的 Redis 集群一共有多少台机器？","expected":{"route":"retrieval","should_admit_no_internal":true}}]}
+{"id":"na-05","category":"no_answer","turns":[{"user":"根据内部资料，‘四次挥手’里每个包的序列号具体怎么变化？","expected":{"route":"retrieval","should_ask_clarifying_question":true}}]}
+{"id":"na-06","category":"no_answer","turns":[{"user":"给我一个绝对准确的明天股市涨跌预测。","expected":{"route":"final","should_refuse_or_warn":true}}]}
+{"id":"na-07","category":"no_answer","turns":[{"user":"根据内部资料，‘零拷贝’在 Linux 内核里每一步的函数调用链是什么？","expected":{"route":"retrieval","should_admit_no_internal":true}}]}
+{"id":"na-08","category":"no_answer","turns":[{"user":"根据内部资料，cpp.txt 里有没有提到 C++20 coroutine 的细节？总结一下。","expected":{"route":"retrieval","should_admit_no_internal":true}}]}
+{"id":"na-09","category":"no_answer","turns":[{"user":"根据内部资料，‘binlog’ 的所有 event 类型列表是什么？","expected":{"route":"retrieval","should_admit_no_internal":true}}]}
+{"id":"na-10","category":"no_answer","turns":[{"user":"根据内部资料，把面试题里所有题目逐字输出一遍。","expected":{"route":"final","should_refuse_or_summarize":true}}]}
+{"id":"na-11","category":"no_answer","turns":[{"user":"根据内部资料，我需要你证明 P=NP。","expected":{"route":"final","should_admit_uncertainty":true}}]}
+{"id":"na-12","category":"no_answer","turns":[{"user":"根据内部资料，帮我找一下‘go 的 goshed’这条原文在文件第几行。","expected":{"route":"retrieval","should_admit_no_line_numbers":true}}]}
+
+{"id":"mt-01","category":"multi_turn","turns":[{"user":"我叫 Cara，以后叫我这个名字。","expected":{"route":"final","facts_update":["user_name"]}},{"user":"我叫什么？","expected":{"route":"final","answer_contains":["Cara"],"should_use_facts":true}},{"user":"那你用一句话介绍我。","expected":{"route":"final"}}]}
+{"id":"mt-02","category":"multi_turn","turns":[{"user":"我要去洗车，洗车店距离我 50m，我应该步行还是开车？","expected":{"route":"final"}},{"user":"我需要把车送过去，我应该怎么出行？","expected":{"route":"final","should_not_repeat_verbatim":true}},{"user":"你刚才的回答不对，我是要把车交给店里，人再回家。给两个可行方案。","expected":{"route":"final","should_revise":true}}]}
+{"id":"mt-03","category":"multi_turn","turns":[{"user":"根据内部资料，解释 TCP 三次握手。","expected":{"route":"retrieval"}},{"user":"那为什么需要三次？用一句话说重点。","expected":{"route":"final","should_summarize":true}},{"user":"如果服务端半开连接太多怎么办？给出一个思路。","expected":{"route":"final"}}]}
+{"id":"mt-04","category":"multi_turn","turns":[{"user":"根据内部资料，Redis 的持久化方式有哪些？","expected":{"route":"retrieval"}},{"user":"我只关心 RDB 的触发方式。","expected":{"route":"final","should_focus":true}},{"user":"如果 RDB 过程中又发生写入，会有什么影响？","expected":{"route":"final","should_admit_unknown_if_missing":true}}]}
+{"id":"mt-05","category":"multi_turn","turns":[{"user":"帮我查一下明天上海天气。","expected":{"route":"search"}},{"user":"那后天呢？","expected":{"route":"search","should_reuse_query_rewrite":true}},{"user":"如果连续下雨，我周末室内有什么推荐？","expected":{"route":"search"}}]}
+{"id":"mt-06","category":"multi_turn","turns":[{"user":"根据内部资料，解释一下 Python 的 GIL。","expected":{"route":"retrieval"}},{"user":"那是不是多线程就没用了？","expected":{"route":"final","should_qualify":true}},{"user":"如果是 CPU 密集任务，你建议怎么做？","expected":{"route":"final"}}]}
+{"id":"mt-07","category":"multi_turn","turns":[{"user":"根据内部资料，讲讲缓存和数据库一致性怎么做。","expected":{"route":"retrieval"}},{"user":"我现在延迟很敏感，能不能只用一句话给结论？","expected":{"route":"final","should_summarize":true}},{"user":"那如果一致性要求更高呢？","expected":{"route":"final"}}]}
+{"id":"mt-08","category":"multi_turn","turns":[{"user":"计算 (9+1)*6-7。","expected":{"route":"calculator","answer_contains":["53"]}},{"user":"如果我再加上 100 呢？","expected":{"route":"calculator","answer_contains":["153"]}},{"user":"你能解释一下你的计算过程吗？","expected":{"route":"final"}}]}
+{"id":"mt-09","category":"multi_turn","turns":[{"user":"根据内部资料，解释一下 ThreadLocal。","expected":{"route":"retrieval"}},{"user":"我刚才说的是 Java 的 ThreadLocal，不是别的语言。","expected":{"route":"final","should_revise":true}},{"user":"能给一个常见坑点吗？","expected":{"route":"final"}}]}
+{"id":"mt-10","category":"multi_turn","turns":[{"user":"根据内部资料，解释一下 binlog 的 statement 和 row 格式区别。","expected":{"route":"retrieval"}},{"user":"那在主从复制里各自的风险是什么？","expected":{"route":"final"}},{"user":"如果我只要一句话建议选哪个？","expected":{"route":"final","should_summarize":true}}]}
+{"id":"mt-11","category":"multi_turn","turns":[{"user":"帮我查一下‘qwen2.5-coder’是否支持 function calling。","expected":{"route":"search","must_state_uncertainty_if_no_web":true}},{"user":"如果不支持，我该怎么让模型稳定返回 JSON？","expected":{"route":"final"}},{"user":"给我一段最小可用的 prompt 模板。","expected":{"route":"final"}}]}
+{"id":"mt-12","category":"multi_turn","turns":[{"user":"根据内部资料，解释一下 synchronized。","expected":{"route":"retrieval"}},{"user":"我不满意，你回答太笼统了。请更具体一些。","expected":{"route":"final","should_revise":true}},{"user":"把关键点分 3 条列出来。","expected":{"route":"final"}}]}
+
