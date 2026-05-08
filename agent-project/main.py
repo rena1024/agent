@@ -6,6 +6,7 @@ from tools import registry
 from colorama import init, Fore
 
 def main():
+    init(autoreset=True)
     settings.tool_registry = registry
     agent = Agent(settings=settings)
     while True:
