@@ -21,7 +21,7 @@ def rewrite_query(
     prompt = (
         "You rewrite a user question into a short query for internal document retrieval.\n"
         "Rules:\n"
-        f"- Output JSON only: {{\"query\":\"...\"}} (no markdown fences)\n"
+        f'- Output JSON only: {{"query":"..."}} (no markdown fences)\n'
         f"- Keep it <= {max_chars} characters\n"
         "- Preserve key entities, acronyms, and Chinese/English keywords\n"
         "- Remove polite filler words\n"
@@ -45,4 +45,3 @@ def rewrite_query(
     except Exception:
         pass
     return q[:max_chars]
-

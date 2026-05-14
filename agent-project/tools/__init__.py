@@ -1,6 +1,7 @@
 from tools.base import ToolRegistry
 from tools.calculator import Calculator
 from tools.search import Search
+
 try:
     from tools.retrieval import Retrieval
 except Exception:  # noqa: BLE001

@@ -6,7 +6,11 @@ from tools import registry
 
 class DummyLLM:
     def chat(self, prompt: str, trace_id: str):
-        return {"action": "tool", "tool": "calculator", "tool_input": {"expression": "1+1"}}
+        return {
+            "action": "tool",
+            "tool": "calculator",
+            "tool_input": {"expression": "1+1"},
+        }
 
 
 def test_reactor_runs_tool_and_finishes():

@@ -1,6 +1,4 @@
 import json
-from agent.parser import parse_plan
-from agent.planner import Plan
 from agent.agent import Agent
 from config import settings
 from tools import registry
@@ -25,7 +23,7 @@ class FakeLLM:
                         "name": self.call_tool,
                         "arguments": json.dumps(self.args),
                     }
-                } 
+                }
             ],
         }
 

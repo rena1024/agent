@@ -7,8 +7,7 @@ class Tool(Protocol):
     name: str
     description: str
 
-    def run(self, tool_input: Dict[str, Any], trace_id: str) -> Dict[str, Any]:
-        ...
+    def run(self, tool_input: Dict[str, Any], trace_id: str) -> Dict[str, Any]: ...
 
 
 class ToolRegistry(dict):

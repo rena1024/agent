@@ -8,7 +8,10 @@ def test_router_extract_compute_bypasses_planner(monkeypatch):
     agent = Agent(settings=settings)
 
     # Force router to pick the quantitative pipeline.
-    agent.router.classify = lambda *args, **kwargs: {"task_type": "Quantitative", "pipeline": "extract_compute"}  # type: ignore[assignment]
+    agent.router.classify = lambda *args, **kwargs: {
+        "task_type": "Quantitative",
+        "pipeline": "extract_compute",
+    }  # type: ignore[assignment]
 
     def _boom(*args, **kwargs):
         raise AssertionError("planner.decide should not be called for extract_compute")
@@ -21,14 +24,20 @@ def test_router_extract_compute_bypasses_planner(monkeypatch):
 def test_extract_compute_supports_caret_power():
     settings.tool_registry = registry
     agent = Agent(settings=settings)
-    agent.router.classify = lambda *args, **kwargs: {"task_type": "Quantitative", "pipeline": "extract_compute"}  # type: ignore[assignment]
+    agent.router.classify = lambda *args, **kwargs: {
+        "task_type": "Quantitative",
+        "pipeline": "extract_compute",
+    }  # type: ignore[assignment]
     assert agent.run("2^3") == "8"
 
 
 def test_quant_word_problem_chicken_rabbit(monkeypatch):
     settings.tool_registry = registry
     agent = Agent(settings=settings)
-    agent.router.classify = lambda *args, **kwargs: {"task_type": "Quantitative", "pipeline": "extract_compute"}  # type: ignore[assignment]
+    agent.router.classify = lambda *args, **kwargs: {
+        "task_type": "Quantitative",
+        "pipeline": "extract_compute",
+    }  # type: ignore[assignment]
 
     def fake_chat_plain(prompt: str, trace_id: str):
         # Produce explanation + pure expression for calculator.
@@ -67,7 +76,9 @@ def test_quant_common_sense_duck_legs_does_not_use_retrieval(monkeypatch):
 
     # Let router run as-is, but make sure we don't hit planner.decide.
     def _boom(*args, **kwargs):
-        raise AssertionError("planner.decide should not be called for quantitative commonsense")
+        raise AssertionError(
+            "planner.decide should not be called for quantitative commonsense"
+        )
 
     monkeypatch.setattr(agent.planner, "decide", _boom)
 
@@ -83,7 +94,10 @@ def test_quant_common_sense_duck_legs_does_not_use_retrieval(monkeypatch):
 def test_quant_legs_duck_and_rabbits_llm_and_verify(monkeypatch):
     settings.tool_registry = registry
     agent = Agent(settings=settings)
-    agent.router.classify = lambda *args, **kwargs: {"task_type": "Quantitative", "pipeline": "extract_compute"}  # type: ignore[assignment]
+    agent.router.classify = lambda *args, **kwargs: {
+        "task_type": "Quantitative",
+        "pipeline": "extract_compute",
+    }  # type: ignore[assignment]
 
     def fake_chat_plain(prompt: str, trace_id: str):
         # First call: derive explanation + expression

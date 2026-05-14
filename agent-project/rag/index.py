@@ -4,7 +4,6 @@ from chromadb.utils import embedding_functions
 
 
 class ChromaIndex:
-
     def __init__(
         self, persist_directory: str = "data/index", model_name: str = "BAAI/bge-m3"
     ):

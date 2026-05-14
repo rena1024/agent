@@ -1,5 +1,5 @@
-from torch.cuda.profiler import start
-import os, glob
+import os
+import glob
 
 from rag.index import ChromaIndex
 

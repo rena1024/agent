@@ -17,11 +17,14 @@ def test_low_confidence_llm_route_falls_back_to_search(monkeypatch):
     }
 
     def _boom(*args, **kwargs):
-        raise AssertionError("direct_generate should not be used on low-confidence route")
+        raise AssertionError(
+            "direct_generate should not be used on low-confidence route"
+        )
 
     monkeypatch.setattr(agent, "_pipeline_direct_generate", _boom)
 
     # Mock search pipeline to make it deterministic.
-    monkeypatch.setattr(agent, "_pipeline_tool_call_answer", lambda *_args, **_kwargs: "ok")
+    monkeypatch.setattr(
+        agent, "_pipeline_tool_call_answer", lambda *_args, **_kwargs: "ok"
+    )
     assert agent.run("随便问点啥") == "ok"
-
