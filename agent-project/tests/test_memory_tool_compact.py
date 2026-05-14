@@ -14,4 +14,3 @@ def test_add_tool_message_compact_stores_refs_only():
     assert len(tool_msgs) == 1
     assert "tool retrieval refs:" in tool_msgs[0]["content"]
     assert "center_chunk_id" in tool_msgs[0]["content"]
-

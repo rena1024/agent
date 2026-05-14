@@ -7,6 +7,7 @@ import uuid
 from typing import Any, Dict
 from colorama import Fore
 
+
 class ExtraJSONFormatter(logging.Formatter):
     """Formatter that renders non-standard record attrs as JSON in extra_json."""
 
@@ -46,8 +47,11 @@ def get_logger():
     if logger.handlers:
         return logger
     handler = logging.StreamHandler(sys.stdout)
-    formatter = ExtraJSONFormatter( Fore.MAGENTA+
-        "%(asctime)s %(levelname)s %(name)s %(message)s\n" + Fore.YELLOW + "extras=%(extra_json)s"
+    formatter = ExtraJSONFormatter(
+        Fore.MAGENTA
+        + "%(asctime)s %(levelname)s %(name)s %(message)s\n"
+        + Fore.YELLOW
+        + "extras=%(extra_json)s"
     )
     handler.setFormatter(formatter)
     logger.addHandler(handler)

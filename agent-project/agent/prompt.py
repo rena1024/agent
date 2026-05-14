@@ -84,7 +84,7 @@ def build_rag_answer_prompt(messages: List[dict], context_chunks: List[dict]) ->
     for i, chunk in enumerate(context_chunks):
         text = chunk.get("text") or ""
         source = chunk.get("metadata", {}).get("source", "unknown")
-        context_texts.append(f"[{i+1}] (source: {source}) {text}")
+        context_texts.append(f"[{i + 1}] (source: {source}) {text}")
     context_block = "\n".join(context_texts)
     return (
         "You are an assistant that must answer using the provided context.\n"

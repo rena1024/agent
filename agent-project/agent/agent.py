@@ -163,7 +163,9 @@ class Agent:
             )
             self.memory.add_tool_message(tool_result, "calculator", trace_id=trace_id)
             if tool_result.get("status") == "ok":
-                return self._finalize(str(tool_result.get("output", "")), trace_id=trace_id)
+                return self._finalize(
+                    str(tool_result.get("output", "")), trace_id=trace_id
+                )
 
         # Fallback: word-problem -> derive expression with LLM, then compute.
         explanation, expr1 = self._derive_expression_with_llm(
@@ -190,7 +192,9 @@ class Agent:
             if tool_result.get("status") == "ok":
                 value = str(tool_result.get("output", "") or "").strip()
                 if explanation:
-                    return self._finalize(f"{explanation}\n答案：{value}", trace_id=trace_id)
+                    return self._finalize(
+                        f"{explanation}\n答案：{value}", trace_id=trace_id
+                    )
                 return self._finalize(value, trace_id=trace_id)
 
         # Last resort: fall back to the legacy planner loop.
@@ -203,7 +207,9 @@ class Agent:
         )
         if tool_result.get("status") == "ok":
             try:
-                refs = self._search_refs_for_memory(query=user_input, tool_result=tool_result)
+                refs = self._search_refs_for_memory(
+                    query=user_input, tool_result=tool_result
+                )
                 self.memory.add_tool_message_compact(
                     content=refs, tool_name="search", trace_id=trace_id
                 )
@@ -227,7 +233,9 @@ class Agent:
 
         # Keep compact refs in memory; use snippets only for local derivation prompt.
         try:
-            refs = self._search_refs_for_memory(query=user_input, tool_result=tool_result)
+            refs = self._search_refs_for_memory(
+                query=user_input, tool_result=tool_result
+            )
             self.memory.add_tool_message_compact(
                 content=refs, tool_name="search", trace_id=trace_id
             )
@@ -251,14 +259,18 @@ class Agent:
             return self._run_planner_loop(user_input, trace_id=trace_id)
 
         calc = self.executor.execute(
-            Plan(action="tool", tool_name="calculator", tool_input={"expression": expr}),
+            Plan(
+                action="tool", tool_name="calculator", tool_input={"expression": expr}
+            ),
             trace_id=trace_id,
         )
         self.memory.add_tool_message(calc, "calculator", trace_id=trace_id)
         if calc.get("status") == "ok":
             value = str(calc.get("output", "") or "").strip()
             if explanation:
-                return self._finalize(f"{explanation}\n答案：{value}", trace_id=trace_id)
+                return self._finalize(
+                    f"{explanation}\n答案：{value}", trace_id=trace_id
+                )
             return self._finalize(value, trace_id=trace_id)
         return self._run_planner_loop(user_input, trace_id=trace_id)
 
@@ -319,14 +331,18 @@ class Agent:
             return self._finalize(summary, trace_id=trace_id)
 
         calc = self.executor.execute(
-            Plan(action="tool", tool_name="calculator", tool_input={"expression": expr}),
+            Plan(
+                action="tool", tool_name="calculator", tool_input={"expression": expr}
+            ),
             trace_id=trace_id,
         )
         self.memory.add_tool_message(calc, "calculator", trace_id=trace_id)
         if calc.get("status") == "ok":
             value = str(calc.get("output", "") or "").strip()
             if explanation:
-                return self._finalize(f"{explanation}\n答案：{value}", trace_id=trace_id)
+                return self._finalize(
+                    f"{explanation}\n答案：{value}", trace_id=trace_id
+                )
             return self._finalize(value, trace_id=trace_id)
 
         return self._run_planner_loop(user_input, trace_id=trace_id)
@@ -471,7 +487,9 @@ class Agent:
                 # Avoid stuffing raw snippets into history; store references only.
                 q = str((plan.tool_input or {}).get("query", user_input))
                 try:
-                    refs = self._search_refs_for_memory(query=q, tool_result=tool_result)
+                    refs = self._search_refs_for_memory(
+                        query=q, tool_result=tool_result
+                    )
                     self.memory.add_tool_message_compact(
                         content=refs, tool_name="search", trace_id=trace_id
                     )
@@ -516,7 +534,9 @@ class Agent:
             extra = ""
             if isinstance(chunk_ids, list) and chunk_ids:
                 extra = f", chunk_ids:{chunk_ids}"
-            parts.append(f"[{i+1}] (source:{src}, center_chunk:{center}{extra}) {text}")
+            parts.append(
+                f"[{i + 1}] (source:{src}, center_chunk:{center}{extra}) {text}"
+            )
         snippets = "\n".join(parts)
         prompt = (
             f"用户问题：{question}\n"
@@ -528,7 +548,9 @@ class Agent:
         resp = self.planner.llm.chat_plain(prompt, trace_id=trace_id)
         return str(resp)
 
-    def _summarize_search_results(self, question: str, search_output: object, trace_id: str) -> str:
+    def _summarize_search_results(
+        self, question: str, search_output: object, trace_id: str
+    ) -> str:
         """
         Summarize search results into a final user-facing answer with sources [1][2]...
         Expects Tavily-like output: {"results":[{"title","url","content","score"},...]}.
@@ -544,7 +566,7 @@ class Agent:
         for i, r in enumerate(results[:5]):
             if not isinstance(r, dict):
                 continue
-            sid = f"S{i+1}"
+            sid = f"S{i + 1}"
             title = str(r.get("title", "") or "")[:160]
             url = str(r.get("url", "") or "")[:300]
             content = str(r.get("content", "") or "")[:500]
@@ -684,7 +706,9 @@ class Agent:
 
         if getattr(self.settings, "enable_router", True):
             route = self.router.classify(user_input, trace_id=trace_id)
-            self.logger.info("router.route", extra={"trace_id": trace_id, "route": route})
+            self.logger.info(
+                "router.route", extra={"trace_id": trace_id, "route": route}
+            )
             try:
                 conf = float((route or {}).get("confidence", 1.0))
             except Exception:
@@ -693,7 +717,12 @@ class Agent:
             if (route or {}).get("source") == "llm" and conf < th:
                 self.logger.info(
                     "router.low_confidence",
-                    extra={"trace_id": trace_id, "confidence": conf, "threshold": th, "route": route},
+                    extra={
+                        "trace_id": trace_id,
+                        "confidence": conf,
+                        "threshold": th,
+                        "route": route,
+                    },
                 )
                 return self._pipeline_tool_call_answer(user_input, trace_id=trace_id)
             pipeline = (route or {}).get("pipeline")
@@ -704,9 +733,13 @@ class Agent:
             if pipeline == "tool_then_compute":
                 return self._pipeline_tool_then_compute(user_input, trace_id=trace_id)
             if pipeline == "rewrite_retrieval_answer":
-                return self._pipeline_rewrite_retrieval_answer(user_input, trace_id=trace_id)
+                return self._pipeline_rewrite_retrieval_answer(
+                    user_input, trace_id=trace_id
+                )
             if pipeline == "retrieval_then_compute":
-                return self._pipeline_retrieval_then_compute(user_input, trace_id=trace_id)
+                return self._pipeline_retrieval_then_compute(
+                    user_input, trace_id=trace_id
+                )
             if pipeline == "direct_generate":
                 return self._pipeline_direct_generate(user_input, trace_id=trace_id)
 

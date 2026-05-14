@@ -25,14 +25,18 @@ class Reactor:
                 refs.append(
                     {
                         "source": meta.get("source"),
-                        "center_chunk_id": meta.get("center_chunk_id", meta.get("chunk_id")),
+                        "center_chunk_id": meta.get(
+                            "center_chunk_id", meta.get("chunk_id")
+                        ),
                         "chunk_ids": meta.get("chunk_ids"),
                     }
                 )
         payload = {"query": query, "rerank_backend": rerank_backend, "hits": refs}
         return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
 
-    def _summarize_context(self, *, question: str, context_chunks: list, llm, trace_id: str) -> str:
+    def _summarize_context(
+        self, *, question: str, context_chunks: list, llm, trace_id: str
+    ) -> str:
         parts = []
         for i, c in enumerate(context_chunks):
             text = (c.get("text", "") or "")[:300]
@@ -43,7 +47,9 @@ class Reactor:
             extra = ""
             if isinstance(chunk_ids, list) and chunk_ids:
                 extra = f", chunk_ids:{chunk_ids}"
-            parts.append(f"[{i+1}] (source:{src}, center_chunk:{center}{extra}) {text}")
+            parts.append(
+                f"[{i + 1}] (source:{src}, center_chunk:{center}{extra}) {text}"
+            )
 
         snippets = "\n".join(parts)
         prompt = (
@@ -56,7 +62,9 @@ class Reactor:
         )
         return str(llm.chat_plain(prompt, trace_id=trace_id))
 
-    def _summarize_search_results(self, *, question: str, search_output: object, llm, trace_id: str) -> str:
+    def _summarize_search_results(
+        self, *, question: str, search_output: object, llm, trace_id: str
+    ) -> str:
         results = []
         if isinstance(search_output, dict):
             results = search_output.get("results") or []
@@ -68,7 +76,7 @@ class Reactor:
         for i, r in enumerate(results[:5]):
             if not isinstance(r, dict):
                 continue
-            sid = f"S{i+1}"
+            sid = f"S{i + 1}"
             title = str(r.get("title", "") or "")[:160]
             url = str(r.get("url", "") or "")[:300]
             content = str(r.get("content", "") or "")[:500]
@@ -108,7 +116,9 @@ class Reactor:
         except Exception:
             return ""
 
-    def _rewrite_retrieval_query(self, memory, llm, question: str, trace_id: str) -> str:
+    def _rewrite_retrieval_query(
+        self, memory, llm, question: str, trace_id: str
+    ) -> str:
         if not getattr(self.settings, "enable_query_rewrite", True):
             return (question or "").strip()
         return rewrite_query(
@@ -140,12 +150,15 @@ class Reactor:
     def run(self, memory, llm, trace_id: str) -> str:
         for step in range(self.max_steps):
             prompt = build_react_prompt(
-                memory.messages, self.tools.keys(), facts_block=self._facts_block(memory)
+                memory.messages,
+                self.tools.keys(),
+                facts_block=self._facts_block(memory),
             )
             plan_dict = llm.chat(prompt, trace_id=trace_id)
             if self.logger:
                 self.logger.info(
-                    "react.plan", extra={"trace_id": trace_id, "step": step, "plan": plan_dict}
+                    "react.plan",
+                    extra={"trace_id": trace_id, "step": step, "plan": plan_dict},
                 )
             plan = parse_plan(plan_dict)
 
@@ -160,24 +173,32 @@ class Reactor:
             if plan.action == "tool":
                 tool = self.tools.get(plan.tool)
                 if not tool:
-                    memory.add_agent_message(f"Unknown tool {plan.tool}", trace_id=trace_id)
+                    memory.add_agent_message(
+                        f"Unknown tool {plan.tool}", trace_id=trace_id
+                    )
                     return f"Unknown tool {plan.tool}"
                 tool_input = plan.tool_input or {}
                 if plan.tool == "retrieval":
                     q0 = str(tool_input.get("query", self._last_user_text(memory)))
-                    q1 = self._rewrite_retrieval_query(memory, llm, q0, trace_id=trace_id)
+                    q1 = self._rewrite_retrieval_query(
+                        memory, llm, q0, trace_id=trace_id
+                    )
                     tool_input = dict(tool_input)
                     tool_input["query"] = q1
                 result = tool.run(tool_input, trace_id=trace_id)
                 if plan.tool == "retrieval":
                     q = str(tool_input.get("query", ""))
                     try:
-                        refs = self._retrieval_refs_for_memory(query=q, tool_result=result)
+                        refs = self._retrieval_refs_for_memory(
+                            query=q, tool_result=result
+                        )
                         memory.add_tool_message_compact(
                             content=refs, tool_name="retrieval", trace_id=trace_id
                         )
                     except Exception:
-                        memory.add_tool_message(result, plan.tool or "unknown", trace_id=trace_id)
+                        memory.add_tool_message(
+                            result, plan.tool or "unknown", trace_id=trace_id
+                        )
                 elif plan.tool == "search" and result.get("status") == "ok":
                     # Store compact refs only to avoid bloating history.
                     out = result.get("output") or {}
@@ -204,7 +225,9 @@ class Reactor:
                         trace_id=trace_id,
                     )
                 else:
-                    memory.add_tool_message(result, plan.tool or "unknown", trace_id=trace_id)
+                    memory.add_tool_message(
+                        result, plan.tool or "unknown", trace_id=trace_id
+                    )
                 try:
                     memory.maybe_summarize(llm, trace_id=trace_id)
                 except Exception:

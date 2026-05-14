@@ -1,8 +1,6 @@
-import json
 import pytest
 
 from agent.parser import parse_plan
-from pydantic import ValidationError
 
 
 def test_tool_call_arguments_malformed():

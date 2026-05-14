@@ -101,9 +101,7 @@ class Retrieval(Tool):
                 rerank_top_n = int(
                     tool_input.get("rerank_top_n", min(5, len(filtered)))
                 )
-                rerank_model = tool_input.get(
-                    "rerank_model", "BAAI/bge-reranker-v2-m3"
-                )
+                rerank_model = tool_input.get("rerank_model", "BAAI/bge-reranker-v2-m3")
                 reranked = rerank_hits(
                     query, filtered, top_n=rerank_top_n, model_name=rerank_model
                 )

@@ -36,17 +36,17 @@ def _quantiles(xs: list[float], ps: list[float]) -> dict[str, float]:
     n = len(ys)
     for p in ps:
         if n == 1:
-            out[f"p{int(p*100)}"] = float(ys[0])
+            out[f"p{int(p * 100)}"] = float(ys[0])
             continue
         # linear interpolation
         idx = (n - 1) * p
         lo = int(math.floor(idx))
         hi = int(math.ceil(idx))
         if lo == hi:
-            out[f"p{int(p*100)}"] = float(ys[lo])
+            out[f"p{int(p * 100)}"] = float(ys[lo])
         else:
             w = idx - lo
-            out[f"p{int(p*100)}"] = float(ys[lo] * (1 - w) + ys[hi] * w)
+            out[f"p{int(p * 100)}"] = float(ys[lo] * (1 - w) + ys[hi] * w)
     return out
 
 
@@ -78,14 +78,22 @@ class Row:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--input", required=True, help="jsonl file with {'q':..., 'label':...}")
+    ap.add_argument(
+        "--input", required=True, help="jsonl file with {'q':..., 'label':...}"
+    )
     ap.add_argument("--output", default="", help="optional jsonl output path")
     ap.add_argument("--top-k", type=int, default=20)
     ap.add_argument("--rerank-top-n", type=int, default=5)
     ap.add_argument("--rerank-model", default="BAAI/bge-reranker-v2-m3")
-    ap.add_argument("--no-rerank", action="store_true", help="disable cross-encoder rerank")
-    ap.add_argument("--torch-threads", type=int, default=2, help="limit torch CPU threads")
-    ap.add_argument("--progress-every", type=int, default=1, help="print progress every N queries")
+    ap.add_argument(
+        "--no-rerank", action="store_true", help="disable cross-encoder rerank"
+    )
+    ap.add_argument(
+        "--torch-threads", type=int, default=2, help="limit torch CPU threads"
+    )
+    ap.add_argument(
+        "--progress-every", type=int, default=1, help="print progress every N queries"
+    )
     args = ap.parse_args()
 
     inp = Path(args.input)
@@ -187,9 +195,13 @@ def main() -> int:
     def show_group(name: str, rs: list[Row]):
         bests = [r.best_distance for r in rs if isinstance(r.best_distance, float)]
         gaps = [r.gap_distance for r in rs if isinstance(r.gap_distance, float)]
-        top1s = [r.top1_rerank_score for r in rs if isinstance(r.top1_rerank_score, float)]
+        top1s = [
+            r.top1_rerank_score for r in rs if isinstance(r.top1_rerank_score, float)
+        ]
         margins = [
-            r.margin_rerank_score for r in rs if isinstance(r.margin_rerank_score, float)
+            r.margin_rerank_score
+            for r in rs
+            if isinstance(r.margin_rerank_score, float)
         ]
         print(f"\n== {name} (n={len(rs)}) ==")
         print("best_distance:", _quantiles(bests, [0.1, 0.5, 0.9]))

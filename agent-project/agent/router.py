@@ -32,7 +32,9 @@ class Route:
         return d
 
 
-_RE_INTERNAL = re.compile(r"(根据|基于)?(内部资料|内部文档|知识库|面试题|面试\.txt|cpp\.txt)")
+_RE_INTERNAL = re.compile(
+    r"(根据|基于)?(内部资料|内部文档|知识库|面试题|面试\.txt|cpp\.txt)"
+)
 _RE_TOOL_BASED = re.compile(
     r"(今天|明天|后天|最新|现在|实时|股价|汇率|天气|新闻|最近|推荐|价格|金价|原油|比赛|展览|更新|版本)"
 )
@@ -48,8 +50,12 @@ _RE_QUANT_INDICATOR = re.compile(
 # Contains a number or Chinese numeric character.
 _RE_HAS_NUMBER = re.compile(r"(\d|[零一二两三四五六七八九十百千万])")
 
-_RE_QUANT_COMMONSENSE = re.compile(r"(几|多少|一共|总共|合计).*(条腿|腿|个|只|米|公里|分钟|小时)")
-_RE_LEGS_WITH_COUNTS = re.compile(r"([零一二两三四五六七八九十百千万\d]+\s*只).*(条腿|腿)")
+_RE_QUANT_COMMONSENSE = re.compile(
+    r"(几|多少|一共|总共|合计).*(条腿|腿|个|只|米|公里|分钟|小时)"
+)
+_RE_LEGS_WITH_COUNTS = re.compile(
+    r"([零一二两三四五六七八九十百千万\d]+\s*只).*(条腿|腿)"
+)
 
 
 _ALLOWED: dict[str, set[str]] = {
@@ -188,7 +194,11 @@ class Router:
                 "source": "rules",
             }
 
-        mode = getattr(self.settings, "router_mode", "hybrid") if self.settings else "hybrid"
+        mode = (
+            getattr(self.settings, "router_mode", "hybrid")
+            if self.settings
+            else "hybrid"
+        )
 
         if mode in ("rules", "hybrid"):
             r = self._rules(text)

@@ -9,7 +9,6 @@ from config import Settings
 
 from pydantic import ValidationError
 from agent.parser import parse_plan
-from colorama import Fore
 
 
 @dataclass
@@ -33,7 +32,9 @@ class Planner:
             facts_block = memory.facts_block()
         except Exception:
             facts_block = ""
-        prompt = build_planner_prompt(memory.messages, self.available_tools, facts_block=facts_block)
+        prompt = build_planner_prompt(
+            memory.messages, self.available_tools, facts_block=facts_block
+        )
         self.logger.info(
             "planner.prompt", extra={"trace_id": trace_id, "prompt": prompt}
         )
