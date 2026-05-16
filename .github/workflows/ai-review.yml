@@ -59,30 +59,14 @@ jobs:
           effort: low
           prompt: |
             Review PR #${{ github.event.pull_request.number }} for ${{ github.repository }}.
-
-            Review ONLY the changes introduced by this pull request. Use the local git history and diff:
-              git log --oneline ${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}
-              git diff --stat ${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}
-
-            Focus on:
-            - bugs or correctness issues
-            - behavioral regressions
-            - missing tests
-            - security or configuration risks
-
-            Keep feedback concise and specific. Use markdown.
-            If there are no actionable findings, output exactly:
-            NO_ACTIONABLE_ISSUES
+            Review only the changes introduced by this pull request.
+            Focus on bugs, regressions, missing tests, and security or configuration risks.
+            Keep the response concise.
+            If there are no actionable findings, output exactly: NO_ACTIONABLE_ISSUES
 
             Demo override:
             - If the pull request title contains [ai-review-demo], output exactly:
               AI review demo: OPENAI_API_KEY is configured and Codex review ran successfully.
-
-            Pull request title:
-            ${{ github.event.pull_request.title }}
-
-            Pull request body:
-            ${{ github.event.pull_request.body }}
 
   post_feedback:
     needs: review
