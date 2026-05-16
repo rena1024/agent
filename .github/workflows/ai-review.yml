@@ -74,6 +74,10 @@ jobs:
             If there are no actionable findings, output exactly:
             NO_ACTIONABLE_ISSUES
 
+            Demo override:
+            - If the pull request title contains [ai-review-demo], output exactly:
+              AI review demo: OPENAI_API_KEY is configured and Codex review ran successfully.
+
             Pull request title:
             ${{ github.event.pull_request.title }}
 
