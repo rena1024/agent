@@ -16,7 +16,7 @@ jobs:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     outputs:
-      final_message: ${{ steps.run_codex.outputs.final-message || '' }}
+      final_message: ${{ steps.demo_message.outputs.final-message || steps.run_codex.outputs.final-message || '' }}
 
     steps:
       - name: Checkout PR merge ref
@@ -47,9 +47,60 @@ jobs:
             "$PR_BASE_REF" \
             "+refs/pull/$PR_NUMBER/head"
 
+      - name: Demo AI verification message
+        id: demo_message
+        if: steps.secret_check.outputs.enabled == 'true' && contains(github.event.pull_request.title, '[ai-review-demo]')
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          payload = {
+              "model": "gpt-5.4-mini",
+              "input": (
+                  "Output exactly this sentence and nothing else: "
+                  "AI review demo: OPENAI_API_KEY is configured and OpenAI API access "
+                  "is working for GitHub Actions."
+              ),
+          }
+
+          req = urllib.request.Request(
+              "https://api.openai.com/v1/responses",
+              data=json.dumps(payload).encode("utf-8"),
+              headers={
+                  "Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}",
+                  "Content-Type": "application/json",
+              },
+              method="POST",
+          )
+
+          with urllib.request.urlopen(req, timeout=60) as resp:
+              data = json.load(resp)
+
+          text = data.get("output_text", "").strip()
+          if not text:
+              for item in data.get("output", []):
+                  for content in item.get("content", []):
+                      if content.get("type") == "output_text":
+                          text = str(content.get("text", "")).strip()
+                          if text:
+                              break
+                  if text:
+                      break
+
+          if not text:
+              raise SystemExit("No text returned from Responses API")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+              fh.write(f"final-message={text}\n")
+          PY
+
       - name: Run Codex review
         id: run_codex
-        if: steps.secret_check.outputs.enabled == 'true'
+        if: steps.secret_check.outputs.enabled == 'true' && !contains(github.event.pull_request.title, '[ai-review-demo]')
         uses: openai/codex-action@v1
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
@@ -59,26 +110,14 @@ jobs:
           effort: low
           prompt: |
             Review PR #${{ github.event.pull_request.number }} for ${{ github.repository }}.
+            Review only the changes introduced by this pull request.
+            Focus on bugs, regressions, missing tests, and security or configuration risks.
+            Keep the response concise.
+            If there are no actionable findings, output exactly: NO_ACTIONABLE_ISSUES
 
-            Review ONLY the changes introduced by this pull request. Use the local git history and diff:
-              git log --oneline ${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}
-              git diff --stat ${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}
-
-            Focus on:
-            - bugs or correctness issues
-            - behavioral regressions
-            - missing tests
-            - security or configuration risks
-
-            Keep feedback concise and specific. Use markdown.
-            If there are no actionable findings, output exactly:
-            NO_ACTIONABLE_ISSUES
-
-            Pull request title:
-            ${{ github.event.pull_request.title }}
-
-            Pull request body:
-            ${{ github.event.pull_request.body }}
+            Demo override:
+            - If the pull request title contains [ai-review-demo], output exactly:
+              AI review demo: OPENAI_API_KEY is configured and Codex review ran successfully.
 
   post_feedback:
     needs: review
